@@ -10,11 +10,15 @@
   },
   "dependencies": {
     "next": "12.2.5",
+    "node-fetch": "^3.2.10",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
   "devDependencies": {
+    "@xstate/inspect": "^0.7.0",
+    "@xstate/react": "^3.0.1",
     "eslint": "8.23.0",
-    "eslint-config-next": "12.2.5"
+    "eslint-config-next": "12.2.5",
+    "xstate": "^4.33.5"
   }
 }
