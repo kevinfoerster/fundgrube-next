@@ -14,64 +14,64 @@ const fetchInitialData = async () => {
 const fundgrubeMachine =
   /** @xstate-layout N4IgpgJg5mDOIC5QDMCuA7aAnVAjMAdAJbpEAuRAhgDYDKZlZYAxBAPbqEkBubA1oTSYoOfMVIUa9RmAQ82AY0ZEOAbQAMAXUSgADm1jkV6HSACeiABwBOAtcsB2AEwAWAKwBGAGzWPAZj91NwAaEAAPRCc-BwJ1P2sHD3Vrezc-Ty8AX0zQoWw8LgkqOgYmZjAsLDYsAl1qRmRqgFsCPJEC8SMpUtl5JQo1LVN9QwGTJHDED2mCPxsvF3UHP385r1CLBABaDxibDOt1Sw83JycUl2zcjHyxIghqFgVqIgU+ADEiaiYsYYMjDimCIILzOAiWdQeSxuRKLLwwjwbRA7fyxKFOdQuFYBBJXEBtUSESi6OpmT7fCqsDiFXgCVo3dpiYmk8k-OToXj9YwabQTEYA8agYGnDwEFyWSwYrx+eHWTyI8xTawuOxYlzqo4OBwpNx4gkdZnUMlfH7lSrVWr1MiNLAtfVMklG1kVdmc5SDXl6f5jIGIFyuWJeTH+LHWJwnaxIhBnSwEDEOSwuE7qKUOS549BsCBwUz2wpdEoyP6jYy+hD+qM2OyOVwHVZBPUMwnEB5gYsCstY9TgrEnBbTeUKzYeFX+oNueH+3aHJxZHL4psGx3Gim-Pne0sTYGSmIykPTFwJmyWKNbFZxuVhmE2BJzI6N4SE9s+rdTE+K7ZQtyxIKLEeg5UAj8bJsiAA */
   createMachine({
-  context: {
-    categories: [],
-    outlets: [],
-    brands: [],
-    filter: {
+    context: {
       categories: [],
-      brands: [],
       outlets: [],
-    },
-  },
-  id: "fundgrube",
-  initial: "initialState",
-  states: {
-    initialState: {
-      invoke: {
-        src: "initialRequest",
-        onDone: [
-          {
-            actions: "storeData",
-            target: "idle",
-          },
-        ],
-        onError: [{}],
+      brands: [],
+      filter: {
+        categories: [],
+        brands: [],
+        outlets: [],
       },
     },
-    idle: {
-      on: {
-        clickFilter: {
-          actions: "toggleFilter",
-          target: "applyFilter",
+    id: "fundgrube",
+    initial: "initialState",
+    states: {
+      initialState: {
+        invoke: {
+          src: "initialRequest",
+          onDone: [
+            {
+              actions: "storeData",
+              target: "idle",
+            },
+          ],
+          onError: [{}],
         },
       },
-    },
-    applyFilter: {
-      invoke: {
-        src: "requestWithFilters",
-        onDone: [
-          {
-            actions: "updatePostings",
-            target: "idle",
+      idle: {
+        on: {
+          clickFilter: {
+            actions: "toggleFilter",
+            target: "applyFilter",
           },
-        ],
-        onError: [{}],
+        },
       },
+      applyFilter: {
+        invoke: {
+          src: "requestWithFilters",
+          onDone: [
+            {
+              actions: "updatePostings",
+              target: "idle",
+            },
+          ],
+          onError: [{}],
+        },
+      },
+
     },
-    
-  },
-}, {
+  }, {
     actions: {
       'updatePostings': assign((context, event) => {
-        return {postings:  event.data.postings}
+        return { postings: event.data.postings }
       }),
       'storeData': assign((context, event) => (event.data)),
       'toggleFilter': assign((context, event) => {
-        
+
         const filterType = event.payload.type
-        const value =event.payload.id
-      
+        const value = event.payload.id
+
         const filterAlreadyExists = context.filter[filterType].indexOf(value) !== -1
 
         const newFilter = filterAlreadyExists ? context.filter[filterType].filter((item) => item !== value) : [...context.filter[filterType], value]
@@ -98,7 +98,7 @@ const fundgrubeMachine =
         );
         return result.json();
       },
-      requestWithFilters:  async (context, event) => {
+      requestWithFilters: async (context, event) => {
         const params = {
           limit: 24,
           offset: 0,
@@ -130,14 +130,31 @@ export default function Home() {
   return <div>
     <h1>fundgrube</h1>
     {state.value}
-    {state.context.filter.categories.map(category => <button key={`filter_category_${category}`}onClick={() => send({
-              type: 'clickFilter', payload: {
-                id: category,
-                type: 'categories'
-              }
-            })}>{category}</button>)}
-    {state.context.filter.brands.map(brand => <button>{brand}</button>)}
-    {state.context.filter.outlets.map(outlet => <button>{outlet}</button>)}
+
+    {state.context.filter.categories.map(category => <button
+      key={`filter_category_${category}`} onClick={() => send({
+        type: 'clickFilter', payload: {
+          id: category,
+          type: 'categories'
+        }
+      })}>{category}</button>)}
+
+    {state.context.filter.brands.map(brand => <button
+      key={`filter_brand_${brand}`} onClick={() => send({
+        type: 'clickFilter', payload: {
+          id: brand,
+          type: 'brands'
+        }
+      })}>{brand}</button>)}
+
+    {state.context.filter.outlets.map(outlet => <button
+      key={`filter_outlet_${outlet}`} onClick={() => send({
+        type: 'clickFilter', payload: {
+          id: outlet,
+          type: 'outlets'
+        }
+      })}>{outlet}</button>)}
+
     <main style={{ display: 'grid', gridTemplateColumns: '1fr 2fr' }}>
       <div>
         <ul>
@@ -152,7 +169,7 @@ export default function Home() {
         </ul>
         <ul>
           {state.context.outlets?.map(outlet => {
-            return <li key={outlet.id}  onClick={() => send({
+            return <li key={outlet.id} onClick={() => send({
               type: 'clickFilter', payload: {
                 id: outlet.id,
                 type: 'outlets'
